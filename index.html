@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Business Insights Dashboard — ACME Demo</title>
+<style>
+:root{--navy:#17243a;--blue:#2457d6;--muted:#64748b;--line:#e3e9f2;--bg:#f4f7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--navy);font:15px/1.5 system-ui,Segoe UI,sans-serif}
+main{max-width:1200px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
+h1{margin:0;font-size:clamp(25px,3vw,35px);letter-spacing:-1px}h2{font-size:17px;margin:0 0 5px}p{margin:5px 0;color:var(--muted)}
+.tag{background:#e3f7ea;color:#17683a;border-radius:20px;padding:7px 12px;font-weight:700;font-size:12px}
+.notice{background:#fff6df;border:1px solid #eed59b;padding:13px 15px;border-radius:12px;margin:20px 0;color:#77501a;font-size:13px}
+.controls,.kpis,.charts,.insights,.lower{display:grid;gap:14px}.controls{grid-template-columns:repeat(2,minmax(180px,260px));margin:18px 0}
+label{display:block;font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;margin-bottom:5px}
+select,button{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:white;color:var(--navy);font:inherit}
+button{cursor:pointer;font-weight:700}button.primary{background:var(--blue);color:white;border-color:var(--blue)}
+.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.card{background:white;border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:0 7px 24px #17243a0b;min-width:0}
+.metric{font-size:32px;font-weight:800;margin-top:10px;letter-spacing:-1px}.muted{color:var(--muted);font-size:12px}
+.charts{grid-template-columns:1.2fr .8fr;margin-top:15px}.barrow{display:grid;grid-template-columns:145px 1fr 25px;gap:10px;align-items:center;margin:16px 0;font-size:13px}
+.track{height:10px;background:#edf1f7;border-radius:20px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,#2457d6,#6a94ff);border-radius:20px}
+.priority{display:grid;grid-template-columns:80px 1fr 24px;gap:10px;align-items:center;margin:18px 0;font-size:13px}.pill{font-size:11px;font-weight:800;border-radius:20px;padding:4px 8px;width:max-content}.High{color:#b42332;background:#ffeaec}.Medium{color:#995700;background:#fff0d5}.Low{color:#087475;background:#e4f7f5}
+.insights{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:15px}.insights h3{font-size:14px;margin:0 0 6px}.insights p{font-size:13px}
+table{width:100%;border-collapse:collapse;min-width:760px}th,td{text-align:left;padding:12px 9px;border-bottom:1px solid #edf1f7;font-size:13px;vertical-align:top}th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.tablewrap{overflow:auto;margin-top:12px}
+.lower{grid-template-columns:1fr 1fr;margin-top:15px}.summary{white-space:pre-wrap;background:#f7f9fd;border:1px solid var(--line);border-radius:10px;padding:13px;font-size:13px;margin:10px 0}
+footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:20px 2px;color:var(--muted);font-size:11px}
+@media(max-width:850px){.kpis{grid-template-columns:repeat(2,1fr)}.charts,.lower{grid-template-columns:1fr}.insights{grid-template-columns:1fr}}
+@media(max-width:500px){main{padding:13px}.controls{grid-template-columns:1fr}.barrow{grid-template-columns:105px 1fr 22px;gap:7px}.card{padding:14px}}
+</style></head>
+<body><main>
+<header><div><p style="color:#2457d6;font-weight:800;letter-spacing:2px;text-transform:uppercase;font-size:11px">Operations intelligence · Portfolio demo</p><h1>AI Business Insights Dashboard</h1><p>IT request trends, operational signals, and recommended next steps.</p></div><span class="tag">● Fictional sample data</span></header>
+<div class="notice"><strong>Demonstration only.</strong> This dashboard uses fictional ACME Business Solutions records and rule-based observations. It is not connected to a live ticketing system or AI model. Insights require human review and are not verified root causes or automatic actions.</div>
+<div class="controls"><div><label for="period">Sample reporting window</label><select id="period"><option value="30">First 30 sample days</option><option value="90">First 90 sample days</option></select></div><div><label for="category">Request category</label><select id="category"><option>All categories</option><option>Access &amp; accounts</option><option>Devices &amp; hardware</option><option>Network &amp; connectivity</option><option>Software</option><option>Printing</option></select></div></div>
+<section class="kpis">
+<div class="card"><div class="muted">Total requests</div><div class="metric" id="total">—</div><div class="muted">Matching sample records</div></div>
+<div class="card"><div class="muted">Open / awaiting / in progress</div><div class="metric" id="open">—</div><div class="muted">Potential follow-up work</div></div>
+<div class="card"><div class="muted">High priority</div><div class="metric" id="high">—</div><div class="muted">Validate against business impact</div></div>
+<div class="card"><div class="muted">Top category</div><div class="metric" id="top" style="font-size:20px">—</div><div class="muted" id="topnote">Most common matching category</div></div>
+</section>
+<section class="charts">
+<div class="card"><h2>Requests by category</h2><p>Volume in the selected sample-day window</p><div id="categoryChart"></div></div>
+<div class="card"><h2>Priority distribution</h2><p>Illustrative labels assigned to sample requests</p><div id="priorityChart"></div></div>
+</section>
+<section class="insights">
+<div class="card"><h3>↻ Recurring request signal</h3><p id="recurring">Calculating…</p></div>
+<div class="card"><h3>◷ Follow-up opportunity</h3><p id="followup">Calculating…</p></div>
+<div class="card"><h3>✦ Knowledge-base opportunity</h3><p id="knowledge">Calculating…</p></div>
+</section>
+<section class="card" style="margin-top:15px"><h2>Sample request queue</h2><p>Example next steps for human review</p><div class="tablewrap"><table><thead><tr><th>Request</th><th>Category</th><th>Priority</th><th>Status</th><th>Suggested next step</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<section class="lower">
+<div class="card"><h2>Owner-ready summary</h2><p>Copy a concise overview for a business review.</p><div id="summary" class="summary"></div><button id="copy" class="primary">Copy summary</button> <span id="copyStatus" class="muted" role="status"></span></div>
+<div class="card"><h2>Responsible-use guardrails</h2><ul class="muted" style="padding-left:18px;line-height:1.8"><li>All data is fictional.</li><li>Observations are rule-based examples, not predictions.</li><li>Review recommendations against real policy before acting.</li><li>No tickets, approvals, accounts, or external systems are changed.</li><li>Never enter passwords, MFA codes, or confidential data.</li></ul></div>
+</section>
+<footer><span>ACME Business Solutions · Portfolio demonstration</span><span>Browser-only · No backend · No production data</span></footer>
+</main>
+<script>
+"use strict";
+const data=[
+["IT-1042","VPN connection drops","Network & connectivity","High","Open","Confirm scope and approved VPN steps; escalate if multiple users are affected.",2],
+["IT-1041","New employee laptop setup","Devices & hardware","Medium","Awaiting approval","Confirm manager approval, equipment availability, and onboarding checklist.",3],
+["IT-1040","Shared folder access","Access & accounts","Medium","In progress","Verify authorization and resource-owner approval before changing access.",4],
+["IT-1039","Printer queue stuck","Printing","Low","Open","Check whether one or multiple users are affected; follow the approved printer guide.",5],
+["IT-1038","Install approved PDF tool","Software","Low","Resolved","Confirm the approved software catalog and licensing requirements.",7],
+["IT-1037","Laptop battery drains quickly","Devices & hardware","Medium","Open","Collect device details and battery health information; arrange inspection if needed.",8],
+["IT-1036","MFA enrollment assistance","Access & accounts","High","Awaiting approval","Use approved identity verification; never request an MFA code.",9],
+["IT-1035","Office Wi-Fi disconnects","Network & connectivity","High","In progress","Check scope and network status; escalate broader impact to the network team.",10],
+["IT-1034","Request spreadsheet software","Software","Low","Awaiting approval","Confirm business need, license availability, and required approval.",12],
+["IT-1033","Replace damaged keyboard","Devices & hardware","Low","Resolved","Check inventory and record the replacement if approved.",13],
+["IT-1032","New shared mailbox access","Access & accounts","Medium","Open","Confirm mailbox owner and business authorization before granting access.",14],
+["IT-1031","Printer not found on laptop","Printing","Medium","In progress","Confirm device, network, and approved driver setup steps.",15],
+["IT-1030","Video meeting app update","Software","Low","Resolved","Use the managed software update process and confirm version compatibility.",16],
+["IT-1029","Intermittent office network","Network & connectivity","High","Awaiting approval","Record affected locations and users; check monitoring and escalation procedures.",18],
+["IT-1028","New starter account request","Access & accounts","Medium","Awaiting approval","Verify onboarding request and approvals before account provisioning.",19],
+["IT-1027","Laptop docking station issue","Devices & hardware","Medium","Open","Test approved cables and dock compatibility under local process.",20],
+["IT-1026","Cannot print to finance printer","Printing","High","Open","Check scope and business impact; follow the support escalation procedure.",22],
+["IT-1025","Request design application","Software","Medium","Awaiting approval","Check approved software list, license cost, and manager approval.",24],
+["IT-1024","Password reset guidance","Access & accounts","Medium","Resolved","Direct the user to verified self-service; do not collect their password.",26],
+["IT-1023","Slow Wi-Fi in meeting room","Network & connectivity","Medium","Open","Gather location and time details; compare reports before escalating.",28],
+["IT-1022","Laptop replacement planning","Devices & hardware","Medium","Awaiting approval","Review device age, business need, budget, and replacement workflow.",33],
+["IT-1021","Access to project folder","Access & accounts","Low","Resolved","Record the approved access outcome in the normal service process.",37],
+["IT-1020","Printer toner request","Printing","Low","Resolved","Check supply inventory and the standard replenishment process.",42],
+["IT-1019","VPN setup for remote worker","Network & connectivity","Medium","Resolved","Use the approved remote-access checklist and confirm device compliance.",48],
+["IT-1018","Install browser extension","Software","Medium","Open","Review security policy and approval before installation.",54],
+["IT-1017","New hire equipment request","Devices & hardware","High","Awaiting approval","Confirm start date, equipment availability, and approval status.",62],
+["IT-1016","Unlock account request","Access & accounts","High","Resolved","Follow approved identity-verification and account recovery procedures.",68],
+["IT-1015","Wi-Fi coverage question","Network & connectivity","Low","Resolved","Share approved connectivity guidance and log recurring concerns.",74],
+["IT-1014","Printer driver update","Printing","Medium","In progress","Validate the approved driver package and test with the affected user.",82],
+["IT-1013","Request analytics software license","Software","Medium","Awaiting approval","Confirm business owner, licensing, and budget approval.",87]
+];
+const cats=["Access & accounts","Devices & hardware","Network & connectivity","Software","Printing"];
+const $=id=>document.getElementById(id);
+function filtered(){let days=+$("period").value,cat=$("category").value;return data.filter(r=>r[6]<=days&&(cat==="All categories"||r[2]===cat))}
+function render(){let a=filtered(),catCount=Object.fromEntries(cats.map(c=>[c,a.filter(r=>r[2]===c).length])),pri=["High","Medium","Low"],pc=Object.fromEntries(pri.map(p=>[p,a.filter(r=>r[3]===p).length])),open=a.filter(r=>["Open","Awaiting approval","In progress"].includes(r[4])),awaiting=a.filter(r=>r[4]==="Awaiting approval").length,sorted=[...cats].sort((x,y)=>catCount[y]-catCount[x]),top=a.length?sorted[0]:"No data";
+$("total").textContent=a.length;$("open").textContent=open.length;$("high").textContent=pc.High;$("top").textContent=a.length?top:"No data";$("topnote").textContent=a.length?catCount[top]+" matching sample requests":"Try changing filters";
+let max=Math.max(1,...cats.map(c=>catCount[c]));$("categoryChart").innerHTML=cats.map(c=>`<div class="barrow"><span>${c}</span><div class="track"><div class="bar" style="width:${catCount[c]/max*100}%"></div></div><b>${catCount[c]}</b></div>`).join("");
+let colors={High:"#b42332",Medium:"#e6a23c",Low:"#0f8b8d"};$("priorityChart").innerHTML=pri.map(p=>`<div class="priority"><span class="pill ${p}">${p}</span><div class="track"><div class="bar" style="width:${a.length?pc[p]/a.length*100:0}%;background:${colors[p]}"></div></div><b>${pc[p]}</b></div>`).join("");
+$("recurring").textContent=a.length?`${top} is the most frequent category in this view (${catCount[top]} requests). Consider whether a reviewed support article or repeatable checklist could help.`:"No matching sample records. Broaden the filters.";
+$("followup").textContent=a.length?`${awaiting} request(s) are awaiting approval. Review age, ownership, and approval steps before concluding there is a bottleneck.`:"No records to assess in this view.";
+let kb=a.filter(r=>["Access & accounts","Network & connectivity","Printing"].includes(r[2])).length;$("knowledge").textContent=a.length?`${kb} request(s) involve access, connectivity, or printing—possible candidates for reviewed knowledge-base guidance.`:"No records to assess in this view.";
+$("rows").innerHTML=a.length?[...a].sort((x,y)=>x[6]-y[6]).map(r=>`<tr><td><b>${r[1]}</b><div class="muted">${r[0]} · sample day ${r[6]}</div></td><td>${r[2]}</td><td><span class="pill ${r[3]}">${r[3]}</span></td><td>${r[4]}</td><td>${r[5]}</td></tr>`).join(""):'<tr><td colspan="5">No sample requests match these filters.</td></tr>';
+$("summary").textContent=a.length?`ACME BUSINESS SOLUTIONS — SAMPLE IT OPERATIONS SUMMARY\nSample-day window: First ${$("period").value} sample days (not calendar dates)\nRequests in selected view: ${a.length}\nOpen, awaiting approval, or in progress: ${open.length}\nHigh-priority sample requests: ${pc.High}\nMost common category: ${top} (${catCount[top]} requests)\nAwaiting approval: ${awaiting}\n\nSuggested review: validate recurring patterns, confirm ownership and approval steps, and consider reviewed knowledge-base guidance.\n\nCaveat: Fictional data and rule-based observations only. Validate against real records and local policy.`:"No sample requests match the current filters. Broaden the reporting window or category selection.\n\nCaveat: Fictional sample data only.";
+$("copyStatus").textContent=""}
+$("period").addEventListener("change",render);$("category").addEventListener("change",render);
+$("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("summary").textContent);$("copyStatus").textContent="Summary copied."}catch(e){let t=document.createElement("textarea");t.value=$("summary").textContent;document.body.appendChild(t);t.select();let ok=document.execCommand("copy");t.remove();$("copyStatus").textContent=ok?"Summary copied.":"Copy blocked; select and copy the summary manually."}});
+render();
+</script></body></html>
